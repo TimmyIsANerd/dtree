@@ -1,34 +1,81 @@
-body {
-  font: 10px sans-serif;
+.family-tree {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
 }
-.linage {
-  fill: none;
-  stroke: #000;
+
+.profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 16px;
+  position: relative;
 }
-.marriage {
-  fill: none;
-  stroke: black;
+
+.profile img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
 }
-.man {
-  background-color: lightblue;
-  border-style: solid;
-  border-width: 1px;
-  box-sizing: border-box;
+
+.relation-bar {
+  position: absolute;
+  bottom: -8px;
+  width: 2px;
+  background-color: black;
+  z-index: -1;
 }
-.woman {
-  background-color: pink;
-  border-style: solid;
-  border-width: 1px;
-  box-sizing: border-box;
+
+.children {
+  display: flex;
+  justify-content: center;
+  position: relative;
 }
-.emphasis {
-  font-style: italic;
+
+.children .profile:not(:last-child) .relation-bar {
+  height: calc(50% + 8px);
 }
-p {
-  padding: 0;
-  margin: 0;
+
+.parents {
+  display: flex;
+  justify-content: center;
+  position: relative;
 }
-svg {
-  border-style: solid;
-  border-width: 1px;
+
+.parents .profile:not(:last-child) .relation-bar {
+  height: calc(50% + 8px);
+}
+
+.spouses {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.spouses .profile:not(:last-child) .relation-bar {
+  height: 50%;
+}
+
+.relation-bar::after {
+  content: "";
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: black;
+  position: absolute;
+  bottom: -5px;
+  left: -4px;
+}
+
+.children .profile:not(:last-child) .relation-bar::after,
+.parents .profile:not(:last-child) .relation-bar::after {
+  top: -5px;
+  bottom: unset;
+}
+
+.spouses .profile:not(:last-child) .relation-bar::after {
+  top: calc(50% - 5px);
 }

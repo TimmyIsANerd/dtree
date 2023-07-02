@@ -1,139 +1,99 @@
-// API Call to Get Family Tree
+const cache = {};
 
-treeData = [
-  {
-    name: "Adefeyitimi Adeyeloja",
-    class: "man",
-    textClass: "emphasis",
-    userId: "",
-    marriages: [
-      {
-        spouse: {
-          name: "Erica",
-          class: "woman",
-          userId: "",
-          extra: {
-            nickname: "Cookie",
-          },
-        },
-        children: [
-          {
-            name: "James",
-            class: "man",
-            userId: "",
-            marriages: [
-              {
-                spouse: {
-                  name: "Alexandra",
-                  class: "woman",
-                  userId: "",
-                },
-                children: [
-                  {
-                    name: "Eric",
-                    class: "man",
-                    userId: "",
-                    marriages: [
-                      {
-                        spouse: {
-                          name: "Eva",
-                          class: "woman",
-                        },
-                      },
-                    ],
-                  },
-                  {
-                    name: "Jane",
-                    class: "woman",
-                    userId: "",
-                  },
-                  {
-                    name: "Jasper",
-                    class: "man",
-                    userId: "",
-                  },
-                  {
-                    name: "Emma",
-                    class: "woman",
-                  },
-                  {
-                    name: "Julia",
-                    class: "woman",
-                    userId: "",
-                  },
-                  {
-                    name: "Jessica",
-                    class: "woman",
-                    userId: "",
-                  },
-                ],
-              },
-            ],
-          },
-        ],
+async function getUserProfile(uid) {
+  if (cache[uid]) {
+    return cache[uid];
+  }
+  const endpoint = "https://inalife.com/version-test/api/1.1/obj/user";
+  const bearer = "fc6a6a9f4a097672d8dc3152d7c4bea0";
+
+  try {
+    const res = await fetch(`${endpoint}/${uid}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${bearer}`,
       },
-    ],
-  },
-];
+    });
 
-function redirectUser(id) {
-  window.location.href = "/user/" + id;
+    if (!res.ok) {
+      throw new Error("Failed to fetch user profile");
+    }
+
+    const data = await res.json();
+    const { response: userProfile } = data;
+    return {
+      firstName: userProfile.first_name_text,
+      lastName: userProfile.last_name_text,
+      profilePicture: userProfile.profile_picture,
+      userExpandedUid: userProfile.user_expanded_custom_user_expanded,
+    };
+  } catch (error) {
+    console.error(error);
+  }
 }
 
+async function getUserExpanded(familyUid) {
+  let endpoint = "https://inalife.com/version-test/api/1.1/obj/userexpanded/";
+  const bearer = "fc6a6a9f4a097672d8dc3152d7c4bea0";
 
-function getProfileID(memberId, treeData){
+  try {
+    const res = await fetch(`${endpoint}/${familyUid}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${bearer}`,
+      },
+    });
 
+    if (!res.ok) {
+      throw new Error("Failed to fetch user profile");
+    }
+
+    const data = await res.json();
+    const { response: familyData } = data;
+    return {
+      children: familyData.children_list_user,
+      parents: familyData.parents_list_user,
+      spouses: familyData.spouses_list_user,
+    };
+  } catch (error) {
+    console.error(error);
+  }
 }
 
+const generateFamilyTree = async (uid) => {
+  const userProfile = await getUserProfile(uid);
+  const familyInfo = await getUserExpanded(userProfile.userExpandedUid);
 
-function initializeFamilyTree() {
-  
-}
+  const tree = {
+    uid,
+    firstName: userProfile.firstName,
+    lastName: userProfile.lastName,
+    profilePicture: userProfile.profilePicture,
+    children: [],
+    parents: [],
+    spouses: [],
+  };
 
+  for (const childUid of familyInfo.children) {
+    const childTree = await generateFamilyTree(childUid);
+    tree.children.push(childTree);
+  }
 
-dTree.init(treeData, {
-  target: "#graph",
-  debug: true,
-  height: 800,
-  width: 1200,
-  callbacks: {
-    // Node Click Function
-    nodeClick: function (name, extra, id) {
-      let memberId = id;
-      console.log({ "User's Name": name, "User's ID": id });
-      getProfileID(memberId, bubbleUserId);
-      // redirectUser(id)
-    },
-    textRenderer: function (name, extra, textClass) {
-      // THis callback is optinal but can be used to customize
-      // how the text is rendered without having to rewrite the entire node
-      // from screatch.
-      if (extra && extra.nickname) name = name + " (" + extra.nickname + ")";
-      return "<p align='center' class='" + textClass + "'>" + name + "</p>";
-    },
-    nodeRenderer: function (
-      name,
-      x,
-      y,
-      height,
-      width,
-      extra,
-      id,
-      nodeClass,
-      textClass,
-      textRenderer
-    ) {
-      // This callback is optional but can be used to customize the
-      // node element using HTML.
-      initializeFamilyTree(id, textRenderer,nodeClass, extra);
-      let node = "";
-      node += "<div ";
-      node += 'style="height:100%;width:100%;" ';
-      node += 'class="' + nodeClass + '" ';
-      node += 'id="node' + id + '">\n';
-      node += textRenderer(name, extra, textClass);
-      node += "</div>";
-      return node;
-    },
-  },
-});
+  for (const parentUid of familyInfo.parents) {
+    const parentTree = await generateFamilyTree(parentUid);
+    tree.parents.push(parentTree);
+  }
+
+  for (const spouseUid of familyInfo.spouses) {
+    const spouseTree = await generateFamilyTree(spouseUid);
+    tree.spouses.push(spouseTree);
+  }
+
+  return tree;
+};
+
+(async () => {
+  const uid = "1685834905941x455958100823927940";
+  const familyTree = await generateFamilyTree(uid);
+  console.log(familyTree)
+})();
