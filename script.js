@@ -1,0 +1,114 @@
+treeData = [
+  {
+    name: "Adefeyitimi Adeyeloja",
+    class: "man",
+    textClass: "emphasis",
+    marriages: [
+      {
+        spouse: {
+          name: "Erica",
+          class: "woman",
+          extra: {
+            nickname: "Cookie",
+          },
+        },
+        children: [
+          {
+            name: "James",
+            class: "man",
+            marriages: [
+              {
+                spouse: {
+                  name: "Alexandra",
+                  class: "woman",
+                },
+                children: [
+                  {
+                    name: "Eric",
+                    class: "man",
+                    marriages: [
+                      {
+                        spouse: {
+                          name: "Eva",
+                          class: "woman",
+                        },
+                      },
+                    ],
+                  },
+                  {
+                    name: "Jane",
+                    class: "woman",
+                  },
+                  {
+                    name: "Jasper",
+                    class: "man",
+                  },
+                  {
+                    name: "Emma",
+                    class: "woman",
+                  },
+                  {
+                    name: "Julia",
+                    class: "woman",
+                  },
+                  {
+                    name: "Jessica",
+                    class: "woman",
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+];
+
+function redirectUser(id) {
+  window.location.href = "/user/" + id;
+}
+
+dTree.init(treeData, {
+  target: "#graph",
+  debug: true,
+  height: 800,
+  width: 1200,
+  callbacks: {
+    // Node Click Function
+    nodeClick: function (name, id) {
+      console.log({ "User's Name": name, "User's ID": id });
+      redirectUser(id)
+    },
+    textRenderer: function (name, extra, textClass) {
+      // THis callback is optinal but can be used to customize
+      // how the text is rendered without having to rewrite the entire node
+      // from screatch.
+      if (extra && extra.nickname) name = name + " (" + extra.nickname + ")";
+      return "<p align='center' class='" + textClass + "'>" + name + "</p>";
+    },
+    nodeRenderer: function (
+      name,
+      x,
+      y,
+      height,
+      width,
+      extra,
+      id,
+      nodeClass,
+      textClass,
+      textRenderer
+    ) {
+      // This callback is optional but can be used to customize the
+      // node element using HTML.
+      let node = "";
+      node += "<div ";
+      node += 'style="height:100%;width:100%;" ';
+      node += 'class="' + nodeClass + '" ';
+      node += 'id="node' + id + '">\n';
+      node += textRenderer(name, extra, textClass);
+      node += "</div>";
+      return node;
+    },
+  },
+});
