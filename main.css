@@ -1,3 +1,7 @@
+h1 {
+  text-align: center;
+}
+
 .family-tree {
   display: flex;
   flex-direction: column;
