@@ -1,13 +1,17 @@
+// API Call to Get Family Tree
+
 treeData = [
   {
     name: "Adefeyitimi Adeyeloja",
     class: "man",
     textClass: "emphasis",
+    userId: "",
     marriages: [
       {
         spouse: {
           name: "Erica",
           class: "woman",
+          userId: "",
           extra: {
             nickname: "Cookie",
           },
@@ -16,16 +20,19 @@ treeData = [
           {
             name: "James",
             class: "man",
+            userId: "",
             marriages: [
               {
                 spouse: {
                   name: "Alexandra",
                   class: "woman",
+                  userId: "",
                 },
                 children: [
                   {
                     name: "Eric",
                     class: "man",
+                    userId: "",
                     marriages: [
                       {
                         spouse: {
@@ -38,10 +45,12 @@ treeData = [
                   {
                     name: "Jane",
                     class: "woman",
+                    userId: "",
                   },
                   {
                     name: "Jasper",
                     class: "man",
+                    userId: "",
                   },
                   {
                     name: "Emma",
@@ -50,10 +59,12 @@ treeData = [
                   {
                     name: "Julia",
                     class: "woman",
+                    userId: "",
                   },
                   {
                     name: "Jessica",
                     class: "woman",
+                    userId: "",
                   },
                 ],
               },
@@ -69,6 +80,17 @@ function redirectUser(id) {
   window.location.href = "/user/" + id;
 }
 
+
+function getProfileID(memberId, treeData){
+
+}
+
+
+function initializeFamilyTree() {
+  
+}
+
+
 dTree.init(treeData, {
   target: "#graph",
   debug: true,
@@ -76,9 +98,11 @@ dTree.init(treeData, {
   width: 1200,
   callbacks: {
     // Node Click Function
-    nodeClick: function (name, id) {
+    nodeClick: function (name, extra, id) {
+      let memberId = id;
       console.log({ "User's Name": name, "User's ID": id });
-      redirectUser(id)
+      getProfileID(memberId, bubbleUserId);
+      // redirectUser(id)
     },
     textRenderer: function (name, extra, textClass) {
       // THis callback is optinal but can be used to customize
@@ -101,6 +125,7 @@ dTree.init(treeData, {
     ) {
       // This callback is optional but can be used to customize the
       // node element using HTML.
+      initializeFamilyTree(id, textRenderer,nodeClass, extra);
       let node = "";
       node += "<div ";
       node += 'style="height:100%;width:100%;" ';
