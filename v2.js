@@ -210,6 +210,7 @@ const cssStyles = `
   align-items: center;
   margin: 16px;
   position: relative;
+  cursor: pointer;
 }
 
 .profile img {
@@ -217,6 +218,7 @@ const cssStyles = `
   height: 100px;
   border-radius: 50%;
   object-fit: cover;
+  margin: 10px 0;
   border: 3px solid #f5181f;
 }
 
