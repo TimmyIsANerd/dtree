@@ -217,6 +217,7 @@ const cssStyles = `
   height: 100px;
   border-radius: 50%;
   object-fit: cover;
+  border: 3px solid #f5181f;
 }
 
 .relation-bar {
