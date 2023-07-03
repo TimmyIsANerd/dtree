@@ -28,6 +28,9 @@ async function getUserProfile(uid) {
       userExpandedUid: userProfile.user_expanded_custom_user_expanded,
     };
     cache[uid] = profile; // Update the cache
+    console.log(
+      `Profile ${profile.firstName} ${profile.lastName}, Expanded ID: ${profile.userExpandedUid}`
+    );
     return profile;
   } catch (error) {
     console.error(error);
@@ -37,6 +40,14 @@ async function getUserProfile(uid) {
 async function getUserExpanded(familyUid) {
   let endpoint = "https://inalife.com/version-test/api/1.1/obj/userexpanded";
   const bearer = "fc6a6a9f4a097672d8dc3152d7c4bea0";
+
+  if(familyUid === undefined) {
+    return {
+      children: [],
+      parents: [],
+      spouses: [],
+    };
+  }
 
   try {
     const res = await fetch(`${endpoint}/${familyUid}`, {
