@@ -196,104 +196,10 @@ function createProfileElement(person) {
   return profile;
 }
 
-const cssStyles = `
-.family-tree {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-}
-
-.profile {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 16px;
-  position: relative;
-  cursor: pointer;
-}
-
-.profile img {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin: 10px 0;
-  border: 3px solid #f5181f;
-}
-
-.relation-bar {
-  position: absolute;
-  bottom: -8px;
-  width: 2px;
-  background-color: black;
-  z-index: -1;
-}
-
-.children {
-  display: flex;
-  justify-content: center;
-  position: relative;
-}
-
-.children .profile:not(:last-child) .relation-bar {
-  height: calc(50% + 8px);
-}
-
-.parents {
-  display: flex;
-  justify-content: center;
-  position: relative;
-}
-
-.parents .profile:not(:last-child) .relation-bar {
-  height: calc(50% + 8px);
-}
-
-.spouses {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: relative;
-}
-
-.spouses .profile:not(:last-child) .relation-bar {
-  height: 50%;
-}
-
-.relation-bar::after {
-  content: "";
-  display: block;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background-color: black;
-  position: absolute;
-  bottom: -5px;
-  left: -4px;
-}
-
-.children .profile:not(:last-child) .relation-bar::after,
-.parents .profile:not(:last-child) .relation-bar::after {
-  top: -5px;
-  bottom: unset;
-}
-
-.spouses .profile:not(:last-child) .relation-bar::after {
-  top: calc(50% - 5px);
-}
-
-
-`;
-
 (async () => {
   const uid = "1685834905941x455958100823927940";
   const familyTree = await generateFamilyTree(uid);
   const treeContainer = document.getElementById("tree-container");
   const familyTreeElement = renderFamilyTree(familyTree);
   treeContainer.appendChild(familyTreeElement);
-
-  const styleElement = document.createElement("style");
-  styleElement.textContent = cssStyles;
-  document.head.appendChild(styleElement);
 })();
