@@ -26,28 +26,43 @@ async function getUserProfile(uid) {
       lastName: userProfile.last_name_text,
       profilePicture: userProfile.profile_picture_image,
       userExpandedUid: userProfile.user_expanded_custom_user_expanded,
+      profileNode: userProfile._id,
     };
     cache[uid] = profile; // Update the cache
-    console.log(
-      `Profile ${profile.firstName} ${profile.lastName}, Expanded ID: ${profile.userExpandedUid}`
-    );
     return profile;
   } catch (error) {
     console.error(error);
   }
 }
 
-async function getUserExpanded(familyUid) {
+async function getUserExpanded(uid) {
   let endpoint = "https://inalife.com/version-test/api/1.1/obj/userexpanded";
   const bearer = "fc6a6a9f4a097672d8dc3152d7c4bea0";
 
-  if(familyUid === undefined) {
-    return {
-      children: [],
-      parents: [],
-      spouses: [],
-    };
+  try {
+    const res = await fetch(`${endpoint}/${uid}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${bearer}`,
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch user profile");
+    }
+
+    const data = await res.json();
+    const { response: familyData } = data;
+
+    return familyData;
+  } catch (error) {
+    console.error(error);
   }
+}
+
+async function getFamilyInfo(familyUid) {
+  let endpoint = "https://inalife.com/version-test/api/1.1/obj/familymember";
+  const bearer = "fc6a6a9f4a097672d8dc3152d7c4bea0";
 
   try {
     const res = await fetch(`${endpoint}/${familyUid}`, {
@@ -64,142 +79,56 @@ async function getUserExpanded(familyUid) {
     const data = await res.json();
     const { response: familyData } = data;
 
-    console.log("Family Data", familyData);
-
-    return {
-      children: familyData.children_list_user || [],
-      parents: familyData.parents_list_user || [],
-      spouses: familyData.spouses_list_user || [],
-    };
+    return familyData;
   } catch (error) {
     console.error(error);
   }
 }
 
-const generateFamilyTree = async (uid, processed = new Set()) => {
-  if (processed.has(uid)) {
-    return null;
-  }
-
-  processed.add(uid);
-
+async function collectInfo(uid) {
   const userProfile = await getUserProfile(uid);
-  const familyInfo = await getUserExpanded(userProfile.userExpandedUid);
+  const userExpanded = await getUserExpanded(userProfile.userExpandedUid);
+  const familyMembers = userExpanded.family_tree_list_custom_new_family;
 
-  const tree = {
-    uid,
-    firstName: userProfile.firstName,
-    lastName: userProfile.lastName,
-    profilePicture: userProfile.profilePicture,
-    children: [],
-    parents: [],
-    spouses: [],
-  };
+  const membersList = await Promise.all(
+    familyMembers.map(async (member) => {
+      const user = await getFamilyInfo(member);
+      const userProfile = await getUserProfile(user.user_user);
 
-  const childPromises = familyInfo.children.map(async (childUid) => {
-    const childTree = await generateFamilyTree(childUid, processed);
-    if (childTree) {
-      tree.children.push(childTree);
-    }
-  });
-  await Promise.all(childPromises);
+      return {
+        firstName: userProfile.firstName,
+        lastName: userProfile.lastName,
+        profilePicture: userProfile.profilePicture,
+        profileNode: userProfile.profileNode,
+        previousNode: user.node_user,
+        relationship_toNode: user.node_relationship_option_node_relation,
+        relationship_toNodeDescription: user.relationship_option_relationship,
+      };
+    })
+  );
 
-  const parentPromises = familyInfo.parents.map(async (parentUid) => {
-    const parentTree = await generateFamilyTree(parentUid, processed);
-    if (parentTree) {
-      tree.parents.push(parentTree);
-    }
-  });
-  await Promise.all(parentPromises);
+  const father = membersList.find(
+    (member) => member.relationship_toNodeDescription === "Father"
+  );
 
-  const spousePromises = familyInfo.spouses.map(async (spouseUid) => {
-    const spouseTree = await generateFamilyTree(spouseUid, processed);
-    if (spouseTree) {
-      tree.spouses.push(spouseTree);
-    }
-  });
-  await Promise.all(spousePromises);
+  delete userProfile.userExpandedUid;
 
-  return tree;
-};
+  let data = [
+    {
+      ...userProfile,
+      previousNode: father.profileNode,
+      relationship_toNode: "father",
+      relationship_toNodeDescription: "child",
+    },
+    ...membersList,
+  ];
 
-function renderFamilyTree(tree) {
-  const container = document.createElement("div");
-  container.classList.add("family-tree");
-
-  const profile = createProfileElement(tree);
-  container.appendChild(profile);
-
-  if (tree.children.length > 0) {
-    const childrenContainer = document.createElement("div");
-    childrenContainer.classList.add("children");
-
-    tree.children.forEach((child) => {
-      const childContainer = renderFamilyTree(child);
-      childrenContainer.appendChild(childContainer);
-
-      const relationBar = document.createElement("div");
-      relationBar.classList.add("relation-bar");
-      childContainer.appendChild(relationBar);
-    });
-
-    container.appendChild(childrenContainer);
-  }
-
-  if (tree.parents.length > 0) {
-    const parentsContainer = document.createElement("div");
-    parentsContainer.classList.add("parents");
-
-    tree.parents.forEach((parent) => {
-      const parentContainer = renderFamilyTree(parent);
-      parentsContainer.appendChild(parentContainer);
-
-      const relationBar = document.createElement("div");
-      relationBar.classList.add("relation-bar");
-      parentContainer.appendChild(relationBar);
-    });
-
-    container.appendChild(parentsContainer);
-  }
-
-  if (tree.spouses.length > 0) {
-    const spousesContainer = document.createElement("div");
-    spousesContainer.classList.add("spouses");
-
-    tree.spouses.forEach((spouse) => {
-      const spouseContainer = renderFamilyTree(spouse);
-      spousesContainer.appendChild(spouseContainer);
-
-      const relationBar = document.createElement("div");
-      relationBar.classList.add("relation-bar");
-      spouseContainer.appendChild(relationBar);
-    });
-
-    container.appendChild(spousesContainer);
-  }
-
-  return container;
-}
-
-function createProfileElement(person) {
-  const profile = document.createElement("div");
-  profile.classList.add("profile");
-
-  const picture = document.createElement("img");
-  picture.src = person.profilePicture;
-  profile.appendChild(picture);
-
-  const name = document.createElement("div");
-  name.textContent = person.firstName + " " + person.lastName;
-  profile.appendChild(name);
-
-  return profile;
+  return data;
 }
 
 (async () => {
   const uid = "1685834905941x455958100823927940";
-  const familyTree = await generateFamilyTree(uid);
-  const treeContainer = document.getElementById("tree-container");
-  const familyTreeElement = renderFamilyTree(familyTree);
-  treeContainer.appendChild(familyTreeElement);
+  const data = await collectInfo(uid);
+  console.log(data);
+
 })();
