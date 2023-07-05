@@ -6,35 +6,13 @@
     <title>Family Tree</title>
     <!-- <link rel="stylesheet" href="./main.css"> -->
 
-    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
-    <script src="https://shrihari-lib.netlify.app/lineage.min.js"></script>
-    <script>
-        var jsonData = [
-            { "id": 1, "pid": 2, "gender": "male", "title": "Title", "name": "Father", "photo": "", "addr": "NY", "cn": "us" },
-            { "id": 2, "pid": 1, "gender": "female", "title": "Title", "name": "Mother", "photo": "", "addr": "NY", "cn": "us" },
-            {
-                "id": 3, "pid": 4, "mid": 2, "fid": 1, "gender": "female", "title": "Title", "name": "Daughter",
-                "photo": "//unsplash.it/80/80", "addr": "USA", "cn": "us"
-            },
-            { "id": 4, "pid": 3, "gender": "male", "title": "Title", "name": "Son-in-Law", "photo": "", "addr": "", "cn": "ca" },
-        ];
-    </script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 
 <body>
     <h1>Family Tree Project</h1>
     <div id="tree-container"></div>
-    <div id="divFamily"></div>
-    <script>
-        var params = {
-            data: jsonData, /*Local variable or file path*/
-            search: true, //false
-            container: "divFamily",
-            template: "circle" // "rounded" // "raised" // "tilted"
-        };
-        var tree = new Lineage(params);
-        tree.load();
-    </script>
+    <!-- <div id="divFamily"></div> -->
 
 
     <script src="./v2.js" defer></script>

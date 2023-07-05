@@ -107,18 +107,25 @@ async function collectInfo(uid) {
     })
   );
 
+  // Check for Father
   const father = membersList.find(
     (member) => member.relationship_toNodeDescription === "Father"
   );
 
-  delete userProfile.userExpandedUid;
+  // Check for Grandfather
+  const grandFather = membersList.find(
+    (member) =>
+      member.previousNode === father.profileNode &&
+      member.relationship_toNodeDescription.includes("Grand")
+  );
 
   let data = [
     {
       ...userProfile,
-      previousNode: father.profileNode,
+      previousNode: grandFather ? grandFather.profileNode : father.profileNode,
       relationship_toNode: "father",
-      relationship_toNodeDescription: "child",
+      relationship_toNodeDescription: "Child",
+      currentUser: true,
     },
     ...membersList,
   ];
@@ -126,9 +133,73 @@ async function collectInfo(uid) {
   return data;
 }
 
+const generateFamilyTree = (familyData) => {
+  const oldestRelationship = familyData.find(
+    (member) => familyData[0].previousNode === member.profileNode
+  );
+
+  const tree = {
+    firstName: oldestRelationship.firstName,
+    lastName: oldestRelationship.lastName,
+    profilePicture: oldestRelationship.profilePicture,
+    profileNode: oldestRelationship.profileNode,
+    children: [],
+    spouse: [],
+  };
+
+  // Remove oldest relationship from family members
+  const familyMembers = familyData.filter(
+    (member) => member.profileNode !== oldestRelationship.profileNode
+  );
+
+  function findChildNode(node) {
+    const child = familyMembers.find(
+      (member) => member.previousNode === node.profileNode
+    );
+
+    return child;
+  }
+
+  // Sort Out Family
+  familyMembers.forEach((member) => {
+    // Check if they have spouse
+    if (
+      member.relationship_toNode === "spouse" &&
+      member.previousNode === oldestRelationship.profileNode
+    ) {
+      const spouse = {
+        firstName: member.firstName,
+        lastName: member.lastName,
+        profilePicture: member.profilePicture,
+        profileNode: member.profileNode,
+      };
+
+      tree.spouse.push(spouse);
+      return;
+    }
+
+    const child = findChildNode(member);
+
+    if (child) {
+      const node = {
+        firstName: member.firstName,
+        profilePicture: member.profilePicture,
+        profileNode: member.profileNode,
+        children: [],
+        spouse: [],
+      };
+
+      tree.children.push(node);
+    }
+
+  });
+
+  return tree;
+};
+
 (async () => {
   const uid = "1685834905941x455958100823927940";
-  const data = await collectInfo(uid);
-  console.log(data);
-
+  const familyData = await collectInfo(uid);
+  const tree = generateFamilyTree(familyData);
+  console.log(tree);
 })();
