@@ -123,83 +123,106 @@ async function collectInfo(uid) {
     {
       ...userProfile,
       previousNode: grandFather ? grandFather.profileNode : father.profileNode,
-      relationship_toNode: "father",
-      relationship_toNodeDescription: "Child",
+      relationship_toNode: "parent",
+      relationship_toNodeDescription: "You",
       currentUser: true,
     },
     ...membersList,
   ];
 
+  data.map((item, index) => {
+    item.id = index + 1;
+    return item;
+  });
+
   return data;
 }
 
-const generateFamilyTree = (familyData) => {
-  const oldestRelationship = familyData.find(
-    (member) => familyData[0].previousNode === member.profileNode
-  );
+function transformData(array) {
+  const transformedData = [];
 
-  const tree = {
-    firstName: oldestRelationship.firstName,
-    lastName: oldestRelationship.lastName,
-    profilePicture: oldestRelationship.profilePicture,
-    profileNode: oldestRelationship.profileNode,
-    children: [],
-    spouse: [],
-  };
-
-  // Remove oldest relationship from family members
-  const familyMembers = familyData.filter(
-    (member) => member.profileNode !== oldestRelationship.profileNode
-  );
-
-  function findChildNode(node) {
-    const child = familyMembers.find(
-      (member) => member.previousNode === node.profileNode
-    );
-
-    return child;
+  function findNode(profileNode) {
+    return array.find((item) => item.profileNode === profileNode);
   }
 
-  // Sort Out Family
-  familyMembers.forEach((member) => {
-    // Check if they have spouse
-    if (
-      member.relationship_toNode === "spouse" &&
-      member.previousNode === oldestRelationship.profileNode
-    ) {
-      const spouse = {
-        firstName: member.firstName,
-        lastName: member.lastName,
-        profilePicture: member.profilePicture,
-        profileNode: member.profileNode,
-      };
+  array.forEach((item) => {
+    const transformedItem = {
+      id: item.id,
+      pid: "",
+      fid: "",
+      mid: "",
+      gender: "",
+      title: "",
+      name: `${item.firstName} ${item.lastName}`,
+      photo: item.profilePicture || "",
+      addr: "",
+      cn: "",
+    };
 
-      tree.spouse.push(spouse);
-      return;
+    if (item.relationship_toNode === "parent") {
+      transformedItem.gender = "male";
+      transformedItem.title = item.relationship_toNodeDescription;
+      transformedItem.addr = "";
+      transformedItem.cn = "";
+      transformedItem.fid = findNode(item.previousNode).id;
+      transformedItem.addr = "";
+      transformedItem.cn = "";
     }
 
-    const child = findChildNode(member);
-
-    if (child) {
-      const node = {
-        firstName: member.firstName,
-        profilePicture: member.profilePicture,
-        profileNode: member.profileNode,
-        children: [],
-        spouse: [],
-      };
-
-      tree.children.push(node);
+    if (item.relationship_toNode === "spouse") {
+      transformedItem.gender = "female";
+      transformedItem.title = item.relationship_toNodeDescription;
+      transformedItem.addr = "";
+      transformedItem.cn = "";
+      transformedItem.pid = findNode(item.previousNode).id;
+      transformedItem.addr = "";
+      transformedItem.cn = "";
     }
 
+    if (item.relationship_toNode === "child") {
+      transformedItem.gender =
+        item.relationship_toNodeDescription === "Daughter" ? "female" : "male";
+      transformedItem.title = item.relationship_toNodeDescription;
+      transformedItem.addr = "";
+      transformedItem.cn = "";
+      transformedItem.fid = findNode(item.previousNode).id;
+      transformedItem.addr = "";
+      transformedItem.cn = "";
+    }
+
+    if (transformedItem.pid === "") {
+      delete transformedItem.pid;
+    }
+
+    if (transformedItem.fid === "") {
+      delete transformedItem.fid;
+    }
+
+    if (transformedItem.mid === "") {
+      delete transformedItem.mid;
+    }
+
+    transformedData.push(transformedItem);
   });
 
-  return tree;
-};
+  return transformedData;
+}
 
 (async () => {
   const uid = "1685834905941x455958100823927940";
   const familyData = await collectInfo(uid);
-  const tree = generateFamilyTree(familyData);
-  console.log(tree);
+  // Usage example
+  const data = transformData(familyData);
+  let family = JSON.stringify(data);
+  console.log(family);
+
+  // var params = {
+  //   data: family /*Local variable or file path*/,
+  //   search: false, //false
+  //   container: "test",
+  //   template: "circle", // "rounded" // "raised" // "tilted"
+  // };
+  
+  // var tree = new Lineage(params);
+  // tree.load();
 })();

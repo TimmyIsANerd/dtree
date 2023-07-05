@@ -6,13 +6,29 @@
     <title>Family Tree</title>
     <!-- <link rel="stylesheet" href="./main.css"> -->
 
-    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://shrihari-lib.netlify.app/lineage.min.js"></script>
+
+    <script>
+        var jsonData = [{ "id": 1, "fid": 8, "gender": "male", "title": "You", "name": "Ikechi Okoro", "photo": "https://50debfac0ab48afd79abb56fe09fb38b.cdn.bubble.io/f1686521768287x286868296827347300/16865217557348072594737949654482.jpeg", "addr": "", "cn": "" }, { "id": 2, "fid": 4, "gender": "male", "title": "Nephew", "name": "Cousin Pikin", "photo": "", "addr": "", "cn": "" }, { "id": 3, "pid": 4, "gender": "female", "title": "Cousin Spouse", "name": "Cousin Wifey", "photo": "", "addr": "", "cn": "" }, { "id": 4, "fid": 6, "gender": "male", "title": "Cousin", "name": "Dear Cousin", "photo": "", "addr": "", "cn": "" }, { "id": 5, "pid": 6, "gender": "female", "title": "Aunt", "name": "Demo5 Demo", "photo": "", "addr": "", "cn": "" }, { "id": 6, "fid": 8, "gender": "male", "title": "Uncle", "name": "James Brown", "photo": "https://50debfac0ab48afd79abb56fe09fb38b.cdn.bubble.io/f1686799679179x908137696249148800/0b3d70432058255.5ed267d8b4c81.jpeg", "addr": "", "cn": "" }, { "id": 7, "pid": 8, "gender": "female", "title": "Grandmother - Paternal", "name": "Demo3 Demo", "photo": "", "addr": "", "cn": "" }, { "id": 8, "fid": 11, "gender": "male", "title": "Grandfather - Paternal", "name": "Demo2 Demo", "photo": "//50debfac0ab48afd79abb56fe09fb38b.cdn.bubble.io/f1688337536491x155845975398549060/profile%20image.svg", "addr": "", "cn": "" }, { "id": 9, "fid": 12, "gender": "male", "title": "Spouse - Mother", "name": "Wifey Second-Parent", "photo": "", "addr": "", "cn": "" }, { "id": 10, "fid": 12, "gender": "male", "title": "Spouse - Father", "name": "Wifey's Dad", "photo": "", "addr": "", "cn": "" }, { "id": 11, "fid": 1, "gender": "male", "title": "Father", "name": "oluwatosin Ologundudu", "photo": "//50debfac0ab48afd79abb56fe09fb38b.cdn.bubble.io/f1688339376110x802291009981628300/Profile.png", "addr": "", "cn": "" }, { "id": 12, "pid": 1, "gender": "female", "title": "Wife", "name": "Test Name", "photo": "//50debfac0ab48afd79abb56fe09fb38b.cdn.bubble.io/f1688337082951x638110401060915600/1601379704989.jpeg", "addr": "", "cn": "" }, { "id": 13, "fid": 1, "gender": "male", "title": "Son", "name": "Mee Too", "photo": "", "addr": "", "cn": "" }, { "id": 14, "fid": 1, "gender": "female", "title": "Daughter", "name": "Betty White", "photo": "//50debfac0ab48afd79abb56fe09fb38b.cdn.bubble.io/f1688338374070x537129887018210400/Profile.png", "addr": "", "cn": "" }]
+    </script>
 </head>
 
 <body>
     <h1>Family Tree Project</h1>
     <div id="tree-container"></div>
-    <!-- <div id="divFamily"></div> -->
+    <div id="divFamily"></div>
+    <div id="test"></div>
+    <script>
+        var params = {
+            data: jsonData, /*Local variable or file path*/
+            search: false, //false
+            container: "divFamily",
+            template: "circle" // "rounded" // "raised" // "tilted"
+        };
+        var tree = new Lineage(params);
+        tree.load();
+    </script>
 
 
     <script src="./v2.js" defer></script>
